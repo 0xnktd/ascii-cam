@@ -31,6 +31,7 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
     color: false,
     invert: false,
     mirror: true,
+    noise: false,
     cellAspect: 0.52,
   };
 
@@ -119,6 +120,7 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
 
     const color = config.color;
     const invert = config.invert;
+    const noise = config.noise;
     const polarity = theme.polarity;
     const peak = theme.peak;
     const bg = theme.bg;
@@ -138,6 +140,10 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
         // density: how "inked" this cell should be (0 = invisible, 1 = full)
         let d = invert ? 1 - lum : lum;
         if (polarity) d = 1 - d;
+        if (noise) {
+          d += (Math.random() - 0.5) * 0.35;
+          d = d < 0 ? 0 : d > 1 ? 1 : d;
+        }
 
         const ch = ramp[Math.min(rLen, (d * (rLen + 1)) | 0)];
         if (ch === ' ' || ch === undefined) continue;

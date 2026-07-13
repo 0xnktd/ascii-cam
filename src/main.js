@@ -17,6 +17,7 @@ const rampPreview = document.getElementById('ramp-preview');
 const colorToggle = document.getElementById('color');
 const invertToggle = document.getElementById('invert');
 const mirrorToggle = document.getElementById('mirror');
+const noiseToggle = document.getElementById('noise');
 const fpsEl = document.getElementById('fps');
 const gridEl = document.getElementById('grid');
 const meanLumaEl = document.getElementById('mean-luma');
@@ -110,6 +111,9 @@ invertToggle.addEventListener('change', () =>
 );
 mirrorToggle.addEventListener('change', () =>
   engine.setConfig({ mirror: mirrorToggle.checked })
+);
+noiseToggle.addEventListener('change', () =>
+  engine.setConfig({ noise: noiseToggle.checked })
 );
 
 /* ── camera ───────────────────────────────────────────────── */
@@ -280,6 +284,9 @@ document.addEventListener('keydown', (e) => {
   } else if (e.key === 'm' || e.key === 'M') {
     mirrorToggle.checked = !mirrorToggle.checked;
     mirrorToggle.dispatchEvent(new Event('change'));
+  } else if (e.key === 'n' || e.key === 'N') {
+    noiseToggle.checked = !noiseToggle.checked;
+    noiseToggle.dispatchEvent(new Event('change'));
   } else if (e.key === 't' || e.key === 'T') {
     const current = document.documentElement.dataset.theme || 'phosphor';
     const idx = VALID_THEMES.indexOf(current);
