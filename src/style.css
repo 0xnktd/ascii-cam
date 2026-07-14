@@ -941,12 +941,13 @@ output#density-value {
   margin-top: auto;
   padding: 24px 28px 28px;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   border-top: 1px solid var(--hair-strong);
   background: linear-gradient(to bottom, var(--ink), var(--ink-2));
 }
 .btn {
-  flex: 1;
+  flex: 1 1 calc(50% - 5px);
   background: var(--ink-2);
   border: 1px solid var(--hair-strong);
   color: var(--bone);

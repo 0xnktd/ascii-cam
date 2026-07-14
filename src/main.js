@@ -28,6 +28,9 @@ const histogramEls = document.querySelectorAll('.histogram div');
 const snapBtn = document.getElementById('snap');
 const recordBtn = document.getElementById('record');
 const recordLabel = document.getElementById('record-label');
+const copyTextBtn = document.getElementById('copy-text');
+const copyTextLabel = document.getElementById('copy-text-label');
+const saveTextBtn = document.getElementById('save-text');
 const recEl = document.getElementById('rec');
 const recTimeEl = document.getElementById('rec-time');
 const startCta = document.getElementById('start-cta');
@@ -261,6 +264,43 @@ function flashViewport() {
 }
 
 snapBtn.addEventListener('click', capture);
+
+/* ── text export ──────────────────────────────────────────── */
+function flashButtonLabel(el, message, duration = 1200) {
+  const original = el.textContent;
+  el.textContent = message;
+  setTimeout(() => {
+    el.textContent = original;
+  }, duration);
+}
+
+async function copyFrameText() {
+  if (document.body.classList.contains('no-video')) return;
+  const text = engine.getFrameText();
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    flashButtonLabel(copyTextLabel, 'Copied!');
+  } catch (err) {
+    console.error('Copy failed:', err);
+    flashButtonLabel(copyTextLabel, 'Copy failed');
+  }
+}
+
+function saveFrameText() {
+  if (document.body.classList.contains('no-video')) return;
+  const text = engine.getFrameText();
+  if (!text) return;
+  const link = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  link.download = `phosphor-${ts}.txt`;
+  link.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+}
+
+copyTextBtn.addEventListener('click', copyFrameText);
+saveTextBtn.addEventListener('click', saveFrameText);
 
 /* ── record ───────────────────────────────────────────────── */
 let mediaRecorder = null;
