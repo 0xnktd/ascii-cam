@@ -675,6 +675,60 @@ output#density-value {
   font-variant-numeric: tabular-nums;
 }
 
+/* ── camera source ───────────────────────────────────────────── */
+.source-picker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+#camera-select {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--ink);
+  border: 1px solid var(--hair-strong);
+  color: var(--bone);
+  padding: 12px 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 180ms ease;
+  min-width: 0;
+}
+#camera-select:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+#camera-select:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.flip-btn {
+  display: none;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  border: 1px solid var(--hair-strong);
+  color: var(--bone-dim);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+.flip-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+@media (hover: none) and (pointer: coarse) {
+  .flip-btn {
+    display: flex;
+  }
+}
+
 /* ── ramp tabs ───────────────────────────────────────────────── */
 .ramp-tabs {
   display: grid;

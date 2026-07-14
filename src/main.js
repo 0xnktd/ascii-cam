@@ -113,24 +113,63 @@ mirrorToggle.addEventListener('change', () =>
 );
 
 /* ── camera ───────────────────────────────────────────────── */
-let mediaStream = null;
+const cameraSelect = document.getElementById('camera-select');
+const flipCameraBtn = document.getElementById('flip-camera');
 
-async function initCamera() {
+let mediaStream = null;
+let currentDeviceId = null;
+let facingMode = 'user';
+
+async function listCameras() {
+  if (!navigator.mediaDevices?.enumerateDevices) return;
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter((d) => d.kind === 'videoinput');
+    cameraSelect.innerHTML = '';
+    cams.forEach((cam, i) => {
+      const opt = document.createElement('option');
+      opt.value = cam.deviceId;
+      opt.textContent = cam.label || `Camera ${i + 1}`;
+      cameraSelect.appendChild(opt);
+    });
+    cameraSelect.disabled = cams.length === 0;
+    if (currentDeviceId && cams.some((c) => c.deviceId === currentDeviceId)) {
+      cameraSelect.value = currentDeviceId;
+    }
+  } catch (err) {
+    console.error('enumerateDevices failed:', err);
+  }
+}
+
+function stopStream() {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach((t) => t.stop());
+    mediaStream = null;
+  }
+}
+
+async function startStream(constraints) {
+  stopStream();
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: 'user',
-      },
+      video: { width: { ideal: 1280 }, height: { ideal: 720 }, ...constraints },
       audio: false,
     });
     video.srcObject = mediaStream;
     await video.play();
     document.body.classList.remove('no-video');
     engine.startLive();
+
+    const settings = mediaStream.getVideoTracks()[0]?.getSettings() ?? {};
+    currentDeviceId = settings.deviceId || currentDeviceId;
+    if (settings.facingMode) facingMode = settings.facingMode;
+    await listCameras();
   } catch (err) {
     console.error('Camera error:', err);
+    video.srcObject = null;
+    engine.stop();
+    engine.startIdle();
+    document.body.classList.add('no-video');
     const label = startCta.querySelector('.start-cta-label');
     const sub = startCta.querySelector('.start-cta-sub');
     label.textContent = 'Sensor blocked';
@@ -140,7 +179,31 @@ async function initCamera() {
   }
 }
 
+function initCamera() {
+  const constraints = currentDeviceId
+    ? { deviceId: { exact: currentDeviceId } }
+    : { facingMode };
+  return startStream(constraints);
+}
+
 startCta.addEventListener('click', initCamera);
+
+cameraSelect.addEventListener('change', () => {
+  if (!cameraSelect.value) return;
+  currentDeviceId = cameraSelect.value;
+  startStream({ deviceId: { exact: currentDeviceId } });
+});
+
+flipCameraBtn.addEventListener('click', () => {
+  facingMode = facingMode === 'user' ? 'environment' : 'user';
+  currentDeviceId = null;
+  startStream({ facingMode });
+});
+
+listCameras();
+if (navigator.mediaDevices) {
+  navigator.mediaDevices.ondevicechange = listCameras;
+}
 
 engine.startIdle();
 
