@@ -63,6 +63,8 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
     histogram: new Array(8).fill(0),
   };
 
+  let frameText = '';
+
   function setConfig(partial) {
     Object.assign(config, partial);
   }
@@ -123,8 +125,11 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
     const peak = theme.peak;
     const bg = theme.bg;
 
+    const lines = new Array(rows);
+
     for (let y = 0; y < rows; y++) {
       const py = offsetY + y * cellH + cellH / 2;
+      let line = '';
       for (let x = 0; x < cols; x++) {
         const i = (y * cols + x) * 4;
         const r = data[i];
@@ -139,8 +144,9 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
         let d = invert ? 1 - lum : lum;
         if (polarity) d = 1 - d;
 
-        const ch = ramp[Math.min(rLen, (d * (rLen + 1)) | 0)];
-        if (ch === ' ' || ch === undefined) continue;
+        const ch = ramp[Math.min(rLen, (d * (rLen + 1)) | 0)] ?? ' ';
+        line += ch;
+        if (ch === ' ') continue;
 
         if (color) {
           // sample video RGB, then lerp from bg toward the sampled color by d
@@ -163,7 +169,10 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
         const px = x * cellW + cellW / 2;
         octx.fillText(ch, px, py);
       }
+      lines[y] = line;
     }
+
+    frameText = lines.join('\n');
 
     stats.luma = lumaSum / total;
     stats.lumaStd = Math.sqrt(Math.max(0, lumaSqSum / total - stats.luma * stats.luma));
@@ -268,5 +277,6 @@ export function createAsciiEngine({ video, outputCanvas, sampleCanvas }) {
     refreshTheme,
     getStats: () => stats,
     getConfig: () => ({ ...config }),
+    getFrameText: () => frameText,
   };
 }
